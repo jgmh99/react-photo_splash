@@ -9,3 +9,4 @@
 
 #### index.css, App.css 삭제
 
+#### 디자인 패턴 : Atomic Design Pattern
