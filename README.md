@@ -8,4 +8,4 @@
 4. css 스타일링을 위한 SASS/SCSS 설치: 'yarn add -D sass'
 
 #### index.css, App.css 삭제
-# react-photo_splash
+
