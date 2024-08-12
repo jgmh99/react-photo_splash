@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 // css import
 import styles from './styles/index.module.scss'
 // 컴포넌트 import 
@@ -8,8 +8,41 @@ import CommonNav from '@/components/common/navigation/CommonNav'
 import CommonFooter from '@/components/common/footer/CommonFooter'
 
 import Card from './components/Card'
+import axios from 'axios'
+// 타입 호출
+import { CardDTO } from './types/card'
 
 function index() {
+  const [imgUrls, setImgUrls] = useState([])
+  const getData = async() => {
+    //unsplash API 호출
+    const API_URL = 'https://api.unsplash.com/search/photos'
+    const API_KEY = 'GLhsNZhR6mzcIpyGyruG1jBg8hkg4udR0TfGWNSyNr4'
+    const PER_PAGE = 30;
+
+    const searchValue = 'korea';
+    const pageValue = 100;
+
+    try{
+      const res = await axios.get(`${API_URL}?query=${searchValue}&client_id=${API_KEY}&page=${pageValue}&per_page=${PER_PAGE}`)
+      console.log(res)
+      if(res.status === 200){
+        setImgUrls(res.data.results)
+      }
+      // 
+    }
+    catch(error){
+      console.log(error)
+    }
+  }
+  const cardList = imgUrls.map( (card:CardDTO) => {
+    return <Card data={card} key={card.id}/>
+  })
+
+  useEffect(()=>{
+    getData()
+  }, [])
+
   return (
     <div className={styles.page}>
       {/* 공통 헤더 UI부분 */}
@@ -31,10 +64,7 @@ function index() {
         </div>
 
         <div className={styles.page__contents__imageBox}>
-          <Card/>
-          <Card/>
-          <Card/>
-          <Card/>
+          { cardList }
         </div>
       </div>
       {/* 공통 Footer UI부분 */}
