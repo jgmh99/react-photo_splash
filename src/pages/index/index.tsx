@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { useRecoilValue } from 'recoil'
+import React, { useEffect, useMemo, useState } from 'react'
+import { useRecoilValue, useRecoilValueLoadable } from 'recoil'
 import {imageData} from '@/recoil/selectors/imageSelectors'
 // css import
 import styles from './styles/index.module.scss'
@@ -10,6 +10,7 @@ import CommonNav from '@/components/common/navigation/CommonNav'
 import CommonFooter from '@/components/common/footer/CommonFooter'
 import Card from './components/Card'
 import DetailDialog from '@/components/common/dialog/DetailDialog'
+import Loading from './components/Loading'
 
 // import axios from 'axios'
 // 타입 호출
@@ -17,7 +18,8 @@ import { CardDTO } from './types/card'
 //
 
 function index() {
-  const imgSelectors = useRecoilValue(imageData) //recoilvalue를 통해서 불러옴
+  //const imgSelector = useRecoilValue(imageData) //recoilvalue를 통해서 불러옴
+  const imgSelector = useRecoilValueLoadable(imageData) //
   const [imgData, setImgData] = useState<CardDTO>()
   const [open, setOpen] = useState<boolean>(false) //상세이미지 다이얼로그 괄리 state
   //store관리를 하고 있기 때문에 주석처리
@@ -43,10 +45,23 @@ function index() {
   //   }
   // }
 
-  const CARD_LIST = imgSelectors.data.results.map( (card:CardDTO) => {
-    return <Card data={card} key={card.id} handleDialog={setOpen} handleSetData={setImgData}/>
-  })
-
+  // const CARD_LIST = imgSelectors.data.results.map( (card:CardDTO) => {
+  //   return <Card data={card} key={card.id} handleDialog={setOpen} handleSetData={setImgData}/>
+  // })
+  const CARD_LIST = useMemo(()=>{
+    //imgSelector의 값이 hasValue | loading일 경우
+    console.log(imgSelector) //ValueLoadable {state: 'hasValue', contents: {…}} 출력
+    
+    if(imgSelector.state === 'hasValue'){
+      const result = imgSelector.contents.results.map( (card:CardDTO) => { //contents를 반복적으로 돌려야하기 때문에 imgSelector.contents.map사용
+        return <Card data={card} key={card.id} handleDialog={setOpen} handleSetData={setImgData}/>
+      })
+      return result
+    }
+    else{
+      return <Loading/>
+    }
+  },[imgSelector])
   // getData가 store에서 관리되고 있기 때문에 필요 없음
   // useEffect(()=>{
   //   getData()
