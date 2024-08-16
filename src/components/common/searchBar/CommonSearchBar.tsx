@@ -6,7 +6,7 @@ import styles from './CommonSearchBar.module.scss'
 
 function CommonSearchBar() {
   const [search, setSearch] = useRecoilState(searchState)
-  const [text, setText] = useState()
+  const [text, setText] = useState("")
   const onChange = (e) => {
     console.log(e.target.value)
     setText(e.target.value)

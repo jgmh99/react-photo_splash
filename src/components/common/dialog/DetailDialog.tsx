@@ -1,6 +1,9 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styles from './DetailDialog.module.scss'
 import { CardDTO, Tag } from '@/pages/index/types/card'
+import toast, { toastConfig } from 'react-simple-toasts'
+import 'react-simple-toasts/dist/theme/dark.css'
+toastConfig({theme : 'dark'})
 
 interface Props{
   data : CardDTO,
@@ -8,10 +11,46 @@ interface Props{
 }
 
 function DetailDialog({data, handleDialog} :Props) {
-  const closeDialog = () => {
+  const [bookMark, setBookMark] = useState(false)
+  //다이얼로그 끄기
+  const closeDialog = (e :any) => {
     handleDialog(false)
+    // 이벤트 버블링 방지
   }
+  //북마크 추가 이벤트
+  const addBookMark = (select: CardDTO) =>{
+    setBookMark(true);
 
+    const getLocalStorage = JSON.parse(localStorage.getItem('bookmark'))
+    // 1. 로컬스토리지에 bookmark라는 데이터가 없을 경우
+    if(!getLocalStorage || getLocalStorage === null){
+      localStorage.setItem('bookmark', JSON.stringify([select]))
+      toast('북마크 추가 완료!')
+    }
+    
+    else{//2. 해당 이미지가 이미 localstorage에 담겨 있을경우
+      if(getLocalStorage.findIndex((item :CardDTO)=>{return item.id === select.id}) > -1){
+        toast('이미 북마크에 추가 되어있습니다.')
+      }
+      else{
+        //3. 해당 이미지가 이미 localstorage - bookmark에 저장 X + bookmark라는 데이터에 이미 어떤 값이 담겨 있는 경우
+        const res = [...getLocalStorage]
+        res.push(select)
+        localStorage.setItem('bookmark', JSON.stringify(res))
+        toast('북마크 추가 완료!!!')
+      }
+    }
+  }
+  useEffect(()=>{
+    const getLocalStorage = JSON.parse(localStorage.getItem('bookmark'))
+
+    if(getLocalStorage && getLocalStorage.findIndex((item :CardDTO) => {return item.id === data.id}) > -1){
+      setBookMark(true)
+    }
+    else if(!getLocalStorage){
+      return
+    }
+  },[])
   return (
     <div className={styles.container}>
       <div className={styles.container__dialog}>
@@ -29,11 +68,17 @@ function DetailDialog({data, handleDialog} :Props) {
           </div>
 
           <div className={styles.bookMark}>
-            <button className={styles.bookMark__button}>
+            <button className={styles.bookMark__button} onClick={()=>addBookMark(data)}>
               {/* 구글 아이콘 사용 */}
+              {bookMark === false ? 
               <span className='material-symbols-outlined' style={{fontSize: 16 + 'px'}}>
                 favorite
+              </span> : 
+              <span className='material-symbols-outlined added' style={{fontSize: 16 + 'px', color : 'red'}}>
+                favorite
               </span>
+              }
+              
             </button>
             <button className={styles.bookMark__button}>다운로드</button>
           </div>
@@ -68,15 +113,11 @@ function DetailDialog({data, handleDialog} :Props) {
           </div>
 
           <div className={styles.tagBox}>
-            <div className={styles.tagBox__tag}>
-              { 
-                data.tags.map((tag:Tag)=>{
-                  return <div className={styles.tagBox__tag} key={tag.title}>
-                    {tag.title}
-                  </div>
-                })
-              }
-              </div>
+            { 
+              data.tags.map((tag:Tag)=>{
+                return <div className={styles.tagBox__tag} key={tag.title}>{tag.title}</div>
+              })
+            }
           </div>
         </div>
 

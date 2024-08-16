@@ -56,6 +56,11 @@ function index() {
       const result = imgSelector.contents.results.map( (card:CardDTO) => { //contents를 반복적으로 돌려야하기 때문에 imgSelector.contents.map사용
         return <Card data={card} key={card.id} handleDialog={setOpen} handleSetData={setImgData}/>
       })
+
+      if(imgSelector.contents.total === 0){
+        return <span> 검색결과 없어용</span>
+        // console.log('검색결과 없음')
+      }
       return result
     }
     else{
